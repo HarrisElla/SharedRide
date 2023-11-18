@@ -1,6 +1,3 @@
-var WHATSAPP_GROUP_1 = "https://chat.whatsapp.com/F5eHk9FmRojDdAQZZ48M9I";//22/10
-var WHATSAPP_GROUP_2 = "https://chat.whatsapp.com/K7dJYLVgjNI2DjUKPqOZjt";//23/10
-var WHATSAPP_GROUP_3 = "https://chat.whatsapp.com/JfZ9DuSxako3S75wC3c77Y";//24/10
 var WHATSAPP_MESSAGE = "היי, מחכים לך בקבוצת הוואטסאפ של ההסעה: ";
 var WHATSAPP_MESSAGE2 = "היי, ראיתי שנרשמת להסעה";
 var GOOGLE_FORMS_SHEET_NAME = "תגובות לטופס 1";
@@ -13,10 +10,7 @@ var WHATSAPP_COLUMN_NAME2 = "whatsapp2";
 var SHEET = SpreadsheetApp.getActiveSpreadsheet();
 var Formsheet;
 var Payboxsheet;
-var FirstDaySheet;
-var SecondDaySheet;
-var ThirdDaySheet;
-var WhatsappGroups = ["https://chat.whatsapp.com/F5eHk9FmRojDdAQZZ48M9I","https://chat.whatsapp.com/K7dJYLVgjNI2DjUKPqOZjt","https://chat.whatsapp.com/JfZ9DuSxako3S75wC3c77Y"];
+var WhatsappGroups;
 
 function showError(msg) {
   var ui = SpreadsheetApp.getUi();
@@ -27,85 +21,10 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('Custom Menu')
-    //.addItem("פיצול טאבים לפי יום",'splitToTabs')
     .addItem("הוספת לינקים לקבוצת וואטסאפ",'addWhatsAppLinks')
     .addItem('השוואה לפייבוקס', 'mergeSheets')
     .addToUi();
 }
-
-function getDaysFromForm() {
-  // Replace 'FORM_ID' with the actual Form ID.
-  var form = FormApp.openById('1MDFmzgYhnq8kagbFTThYR5S5txohD6_f9uDlBWu9kr4');
-
-  // Replace 'QUESTION_INDEX' with the index of the question you want to retrieve options from.
-  var questionIndex = 0;
-
-  // Get the question object
-  var question = form.getItems(FormApp.ItemType.MULTIPLE_CHOICE)[questionIndex];
-
-  // Get the options from the question
-  var options = question.asMultipleChoiceItem().getChoices();
-
-  // Print the options to the current sheet
-  var days = [];
-  for (var i = 0; i < options.length; i++) {
-    days[i] = options[i].getValue();
-  }
-  console.log(days);
-  return days;
-}
-
-function splitToTabs() {
-  if (!fetchData()) return;
-  var days = getDaysFromForm();
-  var formValues = getGoogleFormContent();
-  var headers = Formsheet.getRange(1, 1, 1, Formsheet.getLastColumn())
-  var tabs = [];
-  var lastRows = [];
-  var lastTimeStamp = []
-  var timestampIndex = formValues[0].indexOf("חותמת זמן");
-  var groupIndex = formValues[0].indexOf(TABS_FIELD);
-  
-
-  for(var i = 0; i < days.length; i++) {
-    tabs[i] = SHEET.getSheetByName(days[i]);
-    if(!tabs[i]){
-      tabs[i] = SHEET.insertSheet(days[i]);
-      // The code below copies the hedears
-      headers.copyTo(tabs[i].getRange(1, 1));
-    }
-    lastRows[i] = tabs[i].getLastRow();
-    lastTimeStamp[i] = tabs[i].getRange(tabs[i].getLastRow(), 1, 1, tabs[i].getLastColumn()).getValues()[0][timestampIndex]
-  }
-  
-  console.log("ts array: " + lastTimeStamp);
-  max_ts = Math.max(...lastTimeStamp);
-  console.log("ts: " + max_ts);
-
-  for (var i = 1; i < formValues.length; i++) {
-    //console.log(i);
-    var row = Formsheet.getRange(i+1, 1, 1, Formsheet.getLastColumn())
-    row_ts = formValues[i][timestampIndex];
-    if (max_ts && row_ts <= max_ts) {
-      continue;
-    }
-    //console.log(groupIndex);
-
-    for(var j = 0; j < days.length; j++) {
-      //console.log(formValues[i][groupIndex])
-      if(formValues[i][groupIndex].toString().includes(days[j])){
-        //console.log(days[j]);
-        console.log("add row - " + tabs[j].getLastRow() + " to tab " + days[j]);
-        row.copyTo(tabs[j].getRange(tabs[j].getLastRow()+1, 1));
-      }
-    }
-  }
-
-  for(var j = 0; j < days.length; j++) {
-    addWhatsAppStartConversationLinks(tabs[j],lastRows[j]);
-  }
-}
-
 
 function addWhatsAppStartConversationLinks(sheet,oldLastRow = 1) {
   
@@ -139,7 +58,7 @@ function addWhatsAppStartConversationLinks(sheet,oldLastRow = 1) {
     sheet.getRange(j, whatsappIndex2).setValue(whatsappUrl);
   }
 }
-function addGroupInviteLink(sheet, group = WHATSAPP_GROUP_1,oldLastRow = 1) {
+function addGroupInviteLink(sheet, group ,oldLastRow = 1) {
   if (!fetchData()) return;
   if (!sheet) {
     sheet = SHEET.getSheetByName(GOOGLE_FORMS_SHEET_NAME);
@@ -202,9 +121,7 @@ function mergeSheets() {
     lastColumnPaybox++;
   }
 
-   
-  var tabs = getDaysFromForm();
-  //var tabs = [GOOGLE_FORMS_SHEET_NAME]
+  var tabs = [GOOGLE_FORMS_SHEET_NAME];
   for(l=0; l< tabs.length; l++) {
     console.log("tab: " + l+1 + " of " + tabs.length);
     //Get all registration sheets varaiables
