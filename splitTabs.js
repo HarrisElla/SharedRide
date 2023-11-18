@@ -1,6 +1,3 @@
-var WHATSAPP_GROUP_1 = "https://chat.whatsapp.com/F5eHk9FmRojDdAQZZ48M9I";//22/10
-var WHATSAPP_GROUP_2 = "https://chat.whatsapp.com/K7dJYLVgjNI2DjUKPqOZjt";//23/10
-var WHATSAPP_GROUP_3 = "https://chat.whatsapp.com/JfZ9DuSxako3S75wC3c77Y";//24/10
 var WHATSAPP_MESSAGE = "היי, מחכים לך בקבוצת הוואטסאפ של ההסעה: ";
 var WHATSAPP_MESSAGE2 = "היי, ראיתי שנרשמת להסעה";
 var GOOGLE_FORMS_SHEET_NAME = "תגובות לטופס 1";
@@ -13,10 +10,8 @@ var WHATSAPP_COLUMN_NAME2 = "whatsapp2";
 var SHEET = SpreadsheetApp.getActiveSpreadsheet();
 var Formsheet;
 var Payboxsheet;
-var FirstDaySheet;
-var SecondDaySheet;
-var ThirdDaySheet;
-var WhatsappGroups = ["https://chat.whatsapp.com/F5eHk9FmRojDdAQZZ48M9I","https://chat.whatsapp.com/K7dJYLVgjNI2DjUKPqOZjt","https://chat.whatsapp.com/JfZ9DuSxako3S75wC3c77Y"];
+var WhatsappGroups = [];
+var GOOGLE_FORM_CODE;
 
 function showError(msg) {
   var ui = SpreadsheetApp.getUi();
@@ -35,7 +30,7 @@ function onOpen() {
 
 function getDaysFromForm() {
   // Replace 'FORM_ID' with the actual Form ID.
-  var form = FormApp.openById('1MDFmzgYhnq8kagbFTThYR5S5txohD6_f9uDlBWu9kr4');
+  var form = FormApp.openById(GOOGLE_FORM_CODE);
 
   // Replace 'QUESTION_INDEX' with the index of the question you want to retrieve options from.
   var questionIndex = 0;
@@ -342,6 +337,7 @@ function fetchData() {
   WHATSAPP_MESSAGE = findCorrespondingValue(varSheet, "הודעת וואטסאפ 1");
   WHATSAPP_MESSAGE2 = findCorrespondingValue(varSheet, "הודעת וואטסאפ 2");
   TABS_FIELD = findCorrespondingValue(varSheet, "שם עמודת פיצול לטאבים");
+  GOOGLE_FORM_CODE = findCorrespondingValue(varSheet, "מפתח לטופס");
   
   
   return true;
